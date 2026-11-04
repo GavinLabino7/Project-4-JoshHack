@@ -21,11 +21,14 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: maven
+          cache-dependency-path: JoshHack/pom.xml
 
       - name: Run JUnit regression tests
+        working-directory: JoshHack
         run: chmod +x mvnw && ./mvnw -B clean test
 
       - name: Run PIT mutation testing
+        working-directory: JoshHack
         run: chmod +x mvnw && ./mvnw -B test-compile org.pitest:pitest-maven:mutationCoverage
 
       - name: Upload PIT report
@@ -33,5 +36,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: JoshHack-PIT-Report
-          path: target/pit-reports/
+          path: JoshHack/target/pit-reports/
           if-no-files-found: warn
+
