@@ -52,4 +52,16 @@ void testCalculateNewHpIsDeadFalse(int expected, int current, int amount){
     assertFalse(CombatRules.isDead(hp));
 }
 
+@Test
+void testModifyHpAlive(){
+    creature.modifyHp(-94, "");
+    assertEquals(6, creature.hp());
+}
+
+@Test
+void testModifyHpDead(){
+    creature.modifyHp(-100, "");
+    assertEquals(0, creature.hp());
+}
+
 }
