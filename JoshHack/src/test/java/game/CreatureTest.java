@@ -33,37 +33,23 @@ void setUp() {
     creature.z = 0;
 }
 
-@AfterEach
-void tearDown(){
-    creature = null;
-    world = null;
-}
-
-@ParameterizedTest
-@CsvSource({
-    "-1, 99",
-    "0, 100",
-    "1, 100",
-})
-void testModifyHp(int amount, int expected){
-    creature.modifyHp(amount, "");
-    assertEquals(expected, creature.hp());
-}
-
 @Test
-void testIsDeadTrue(){
-    creature.modifyHp(-100, "");
-    assertTrue(CombatRules.isDead(creature.hp()));
-} 
+void testCalculateNewHpIsDeadTrue(){
+    int hp = CombatRules.calculateNewHp(1, 100, -1);
+    assertEquals(0, hp);
+    assertTrue(CombatRules.isDead(hp));
+}
 
 @ParameterizedTest 
 @CsvSource({
-    "-99",
-    "-98"
+    "100, 100, 1",
+    "1, 1, 0",
+    "2, 40, -38"
 }) 
-void testIsDeadFalse(int amount){
-    creature.modifyHp(amount, "");
-    assertFalse(CombatRules.isDead(creature.hp()));
-} 
+void testCalculateNewHpIsDeadFalse(int expected, int current, int amount){
+    int hp = CombatRules.calculateNewHp(current, 100, amount);
+    assertEquals(expected, hp);
+    assertFalse(CombatRules.isDead(hp));
+}
 
 }
