@@ -56,12 +56,14 @@ void testCalculateNewHpIsDeadFalse(int expected, int current, int amount){
 void testModifyHpAlive(){
     creature.modifyHp(-94, "");
     assertEquals(6, creature.hp());
+    assertNull(world.item(1, 1, 0));
 }
 
 @Test
 void testModifyHpDead(){
-    creature.modifyHp(-100, "");
+    creature.modifyHp(-100, "combat");
     assertEquals(0, creature.hp());
+    assertNotNull(world.item(1, 1, 0));
 }
 
 }
