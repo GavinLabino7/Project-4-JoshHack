@@ -1,0 +1,38 @@
+name: Quality
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Run JUnit regression tests
+        run: ./mvnw --batch-mode test
+
+      - name: Run PIT mutation testing
+        run: ./mvnw --batch-mode org.pitest:pitest-maven:mutationCoverage
+
+      - name: Run SpotBugs
+        run: ./mvnw --batch-mode -DskipTests verify
+
+      - name: Upload SpotBugs SARIF results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: target/spotbugs.sarif

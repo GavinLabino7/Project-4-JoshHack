@@ -77,6 +77,28 @@
                     <classpathScope>compile</classpathScope>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.9.8.2</version>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>Low</threshold>
+                    <sarifOutput>true</sarifOutput>
+                    <sarifOutputDirectory>${project.build.directory}</sarifOutputDirectory>
+                    <sarifOutputFilename>spotbugs.sarif</sarifOutputFilename>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>spotbugs-analysis</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>spotbugs</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
