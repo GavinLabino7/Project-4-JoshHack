@@ -7,6 +7,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   quality-checks:
     runs-on: ubuntu-latest
@@ -31,8 +35,16 @@ jobs:
         working-directory: JoshHack
         run: chmod +x mvnw && ./mvnw -B test-compile org.pitest:pitest-maven:mutationCoverage
 
+      - name: Run SpotBugs
+        working-directory: JoshHack
+        run: chmod +x mvnw && ./mvnw -B -DskipTests verify
+
+      - name: Upload SpotBugs SARIF results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: JoshHack/target/spotbugs.sarif
+
       - name: Upload PIT report
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: JoshHack-PIT-Report
