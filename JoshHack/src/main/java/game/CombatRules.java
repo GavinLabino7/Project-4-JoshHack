@@ -8,6 +8,9 @@ public class CombatRules {
         if (newHp > maxHp)
             return maxHp;
 
+        if (newHp < 0)
+            return 0;
+
         return newHp;
     }
 
