@@ -72,7 +72,17 @@ public class InventoryTest {
 
     @Test
     void testContainsNull() {
-        assertTrue(inventory.contains(null));
+        assertFalse(inventory.contains(null));
+    }
+
+    @Test
+    void testRemoveNull() {
+        inventory.add(item1);
+
+        inventory.remove(null);
+
+        assertTrue(inventory.contains(item1));
+        assertEquals(item1, inventory.get(0));
     }
 
     @Test
@@ -98,6 +108,18 @@ public class InventoryTest {
         assertEquals(item1, items[0]);
         assertEquals(item2, items[1]);
         assertNull(items[2]);
+    }
+
+    @Test
+    void testGetItemsReturnsCopy() {
+        inventory.add(item1);
+
+        Item[] items = inventory.getItems();
+        items[0] = item2;
+
+        assertTrue(inventory.contains(item1));
+        assertFalse(inventory.contains(item2));
+        assertEquals(item1, inventory.get(0));
     }
 
     @ParameterizedTest

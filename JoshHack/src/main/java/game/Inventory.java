@@ -3,7 +3,7 @@ package game;
 public class Inventory {
 
 	private Item[] items;
-	public Item[] getItems() { return items; }
+	public Item[] getItems() { return items.clone(); }
 	public Item get(int i) { return items[i]; }
 	
 	public Inventory(int max){
@@ -20,6 +20,9 @@ public class Inventory {
 	}
 
 	public void remove(Item item){
+		if (item == null)
+			return;
+
 		for (int i = 0; i < items.length; i++){
 			if (items[i] == item){
 				items[i] = null;
@@ -38,6 +41,9 @@ public class Inventory {
 	}
 	
 	public boolean contains(Item item) {
+		if (item == null)
+			return false;
+
 		for (Item i : items){
 			if (i == item)
 				return true;
