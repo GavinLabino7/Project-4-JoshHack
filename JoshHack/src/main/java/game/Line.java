@@ -6,7 +6,12 @@ import java.util.List;
 
 public class Line implements Iterable<Point> {
 	private List<Point> points;
-	public List<Point> getPoints() { return points; }
+	public List<Point> getPoints() {
+		List<Point> copy = new ArrayList<Point>();
+		for (Point point : points)
+			copy.add(new Point(point.x, point.y, point.z));
+		return List.copyOf(copy);
+	}
 	
 	public Line(int x0, int y0, int x1, int y1) {
 		points = new ArrayList<Point>();
@@ -38,6 +43,6 @@ public class Line implements Iterable<Point> {
 
 	@Override
 	public Iterator<Point> iterator() {
-		return points.iterator();
+		return getPoints().iterator();
 	}
 }

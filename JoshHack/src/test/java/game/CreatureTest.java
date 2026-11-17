@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import java.awt.Color;
+import java.util.List;
 
 public class CreatureTest {
 
@@ -134,6 +135,48 @@ void testModifyXpIncreasesLevelAfterThreshold(){
     assertEquals(26, creature.xp());
     assertEquals(2, creature.level());
     assertEquals(1, ai.levelUps);
+}
+
+@Test
+void testEffectsCannotBeMutatedThroughGetter(){
+    creature.effects();
+    List<Effect> snapshot = creature.effects();
+
+    assertThrows(UnsupportedOperationException.class, () -> snapshot.clear());
+    assertThrows(UnsupportedOperationException.class, () -> snapshot.add(new Effect(1)));
+}
+
+@Test
+void testLinePointsCannotBeMutatedThroughGetter(){
+    Line line = new Line(0, 0, 2, 2);
+    List<Point> snapshot = line.getPoints();
+    snapshot.get(0).x = 99;
+
+    assertEquals(0, line.getPoints().get(0).x);
+    assertThrows(UnsupportedOperationException.class, () -> snapshot.clear());
+}
+
+@Test
+void testWrittenSpellsCannotBeMutatedThroughGetter(){
+    Item item = new Item('?', Color.BLUE, "Spellbook", null);
+    item.addWrittenSpell("Fireball", 5, null);
+
+    List<Spell> snapshot = item.writtenSpells();
+
+    assertEquals(1, snapshot.size());
+    assertThrows(UnsupportedOperationException.class, snapshot::clear);
+}
+
+@Test
+void testPathPointsCannotBeMutatedThroughGetter(){
+    Path path = new Path(creature, 2, 2);
+    List<Point> snapshot = path.points();
+
+    assertThrows(UnsupportedOperationException.class, () -> snapshot.clear());
+    if (!snapshot.isEmpty()) {
+        snapshot.get(0).x = 99;
+        assertNotEquals(99, path.points().get(0).x);
+    }
 }
 
 }

@@ -89,7 +89,7 @@ public class Creature {
 	public void modifyRegenHpPer1000(int amount) { regenHpPer1000 += amount; }
 	
 	private List<Effect> effects;
-	public List<Effect> effects(){ return effects; }
+	public List<Effect> effects(){ return List.copyOf(effects); }
 	
 	private int maxMana;
 	public int maxMana() { return maxMana; }

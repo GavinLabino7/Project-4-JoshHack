@@ -43,7 +43,7 @@ public class Item {
 	public void setQuaffEffect(Effect effect) { this.quaffEffect = effect; }
 	
 	private List<Spell> writtenSpells;
-	public List<Spell> writtenSpells() { return writtenSpells; }
+	public List<Spell> writtenSpells() { return List.copyOf(writtenSpells); }
 	
 	public void addWrittenSpell(String name, int manaCost, Effect effect){
 		writtenSpells.add(new Spell(name, manaCost, effect));
