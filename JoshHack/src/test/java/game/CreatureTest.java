@@ -179,4 +179,166 @@ void testPathPointsCannotBeMutatedThroughGetter(){
     }
 }
 
+@Test
+void testCreatureStatsAndModifiers(){
+    creature.modifyMaxHp(5);
+    creature.modifyAttackValue(2);
+    creature.modifyDefenseValue(3);
+    creature.modifyVisionRadius(2);
+    creature.modifyMaxMana(3);
+    creature.modifyMana(-20);
+    creature.modifyMana(4);
+    creature.modifyRegenHpPer1000(5);
+    creature.modifyRegenManaPer1000(5);
+    creature.modifyDetectCreatures(1);
+
+    assertEquals(105, creature.maxHp());
+    assertEquals(12, creature.attackValue());
+    assertEquals(8, creature.defenseValue());
+    assertEquals(11, creature.visionRadius());
+    assertEquals(8, creature.maxMana());
+    assertEquals(4, creature.mana());
+    assertEquals(666, creature.food());
+    assertTrue(creature.isPlayer());
+    assertEquals("josh", creature.name());
+    assertEquals(Color.GRAY, creature.color());
+    assertEquals('@', creature.glyph());
+}
+
+@Test
+void testMovementStairsAndDigging(){
+    Tile[][][] tiles = floorTiles(3, 3, 2);
+    tiles[1][1][0] = Tile.STAIRS_DOWN;
+    tiles[1][1][1] = Tile.STAIRS_UP;
+    World stairWorld = new World(tiles);
+    Creature climber = new Creature(stairWorld, '@', Color.GRAY, "climber", 20, 5, 1);
+    new CreatureAi(climber);
+    climber.x = 1;
+    climber.y = 1;
+    stairWorld.add(climber);
+
+    climber.moveBy(0, 0, 0);
+    climber.moveBy(0, 0, 1);
+    assertEquals(1, climber.z);
+    climber.moveBy(0, 0, -1);
+    assertEquals(0, climber.z);
+    tiles[1][1][0] = Tile.FLOOR;
+    climber.moveBy(0, 0, -1);
+    assertEquals(0, climber.z);
+
+    creature.moveBy(1, 0, 0);
+    assertEquals(2, creature.x);
+    creature.dig(0, 0, 0);
+}
+
+@Test
+void testAttacksAwardXpAndUseEquipment(){
+    Creature defender = new Creature(world, 'g', Color.GREEN, "goblin", 20, 1, 0);
+    new CreatureAi(defender);
+    defender.x = 2;
+    defender.y = 1;
+    defender.z = 0;
+    world.add(defender);
+
+    Item weapon = new Item('/', Color.WHITE, "bow", null);
+    weapon.modifyAttackValue(4);
+    weapon.modifyRangedAttackValue(6);
+    creature.equip(weapon);
+    creature.rangedWeaponAttack(defender);
+    assertTrue(defender.hp() < 20);
+    defender.modifyHp(-100, "reset");
+
+    Creature victim = new Creature(world, 'g', Color.GREEN, "victim", 2, 1, 0);
+    new CreatureAi(victim);
+    victim.x = 2;
+    victim.y = 2;
+    world.add(victim);
+    creature.meleeAttack(victim);
+    assertEquals(0, victim.hp());
+    assertTrue(creature.xp() > 0);
+}
+
+@Test
+void testPickupDropEquipAndConsume(){
+    Item item = new Item('!', Color.WHITE, "potion", null);
+    world.addAtEmptySpace(item, 1, 1, 0);
+    creature.pickup();
+    assertTrue(creature.inventory().contains(item));
+
+    creature.equip(item);
+    creature.unequip(item);
+    creature.drop(item);
+    assertFalse(creature.inventory().contains(item));
+
+    Item food = new Item('%', Color.WHITE, "food", null);
+    food.modifyFoodValue(20);
+    creature.inventory().add(food);
+    creature.eat(food);
+    assertFalse(creature.inventory().contains(food));
+
+    Item gross = new Item('%', Color.WHITE, "gross", null);
+    gross.modifyFoodValue(-20);
+    creature.inventory().add(gross);
+    creature.quaff(gross);
+    creature.modifyFood(-10000);
+    assertEquals(0, creature.hp());
+}
+
+@Test
+void testHealthManaEffectsAndSpells(){
+    creature.modifyHp(-10, "damage");
+    creature.modifyMana(-3);
+    creature.modifyRegenHpPer1000(1000);
+    creature.modifyRegenManaPer1000(1000);
+    creature.update();
+    assertEquals(91, creature.hp());
+    assertEquals(3, creature.mana());
+
+    Creature target = new Creature(world, 'g', Color.GREEN, "target", 50, 1, 0);
+    new CreatureAi(target);
+    target.x = 2;
+    target.y = 1;
+    target.z = 0;
+    world.add(target);
+    creature.castSpell(new Spell("zap", 2, new Effect(2)), 2, 1);
+    assertEquals(1, creature.mana());
+    creature.castSpell(new Spell("expensive", 20, new Effect(1)), 2, 1);
+    creature.castSpell(new Spell("zap", 2, new Effect(1)), 0, 0);
+}
+
+@Test
+void testVisibilityNamingActionsAndDetails(){
+    Creature observer = new Creature(world, 'o', Color.WHITE, "observer", 20, 1, 1);
+    new CreatureAi(observer);
+    observer.x = 0;
+    observer.y = 1;
+    observer.z = 0;
+    world.add(observer);
+
+    assertTrue(creature.canSee(0, 0, 0));
+    assertEquals(Tile.FLOOR, creature.tile(0, 0, 0));
+    assertTrue(creature.canEnter(2, 2, 0));
+    assertFalse(creature.canEnter(0, 1, 0));
+    creature.doAction("wave");
+    creature.doAction(new Item('?', Color.WHITE, "thing", null), "use");
+
+    Item unknown = new Item('?', Color.WHITE, "potion", "red liquid");
+    assertEquals("red liquid", creature.nameOf(unknown));
+    creature.learnName(unknown);
+    assertEquals("potion", creature.nameOf(unknown));
+    assertTrue(creature.details().contains("level:"));
+    creature.modifyDetectCreatures(-1);
+    assertNull(creature.item(99, 99, 0));
+    assertNull(creature.creature(99, 99, 0));
+}
+
+private static Tile[][][] floorTiles(int width, int height, int depth) {
+    Tile[][][] tiles = new Tile[width][height][depth];
+    for (int x = 0; x < width; x++)
+        for (int y = 0; y < height; y++)
+            for (int z = 0; z < depth; z++)
+                tiles[x][y][z] = Tile.FLOOR;
+    return tiles;
+}
+
 }
