@@ -206,6 +206,13 @@ void testCreatureStatsAndModifiers(){
 }
 
 @Test
+void testModifyManaDoesNotExceedMaximum(){
+    creature.modifyMana(10);
+
+    assertEquals(creature.maxMana(), creature.mana());
+}
+
+@Test
 void testMovementStairsAndDigging(){
     Tile[][][] tiles = floorTiles(3, 3, 2);
     tiles[1][1][0] = Tile.STAIRS_DOWN;
